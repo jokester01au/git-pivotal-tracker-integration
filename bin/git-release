@@ -16,4 +16,7 @@
 
 require 'git-pivotal-tracker-integration/command/release'
 
-GitPivotalTrackerIntegration::Command::Release.new().run ARGV[0]
+begin
+  GitPivotalTrackerIntegration::Command::Release.new().run ARGV[0]
+rescue Interrupt
+end

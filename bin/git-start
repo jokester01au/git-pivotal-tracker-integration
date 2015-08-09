@@ -16,4 +16,7 @@
 
 require 'git-pivotal-tracker-integration/command/start'
 
-GitPivotalTrackerIntegration::Command::Start.new().run ARGV[0]
+begin
+  GitPivotalTrackerIntegration::Command::Start.new().run(*ARGV)
+rescue Interrupt
+end
