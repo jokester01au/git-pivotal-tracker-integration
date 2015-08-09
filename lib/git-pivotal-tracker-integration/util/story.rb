@@ -50,6 +50,7 @@ class GitPivotalTrackerIntegration::Util::Story
   #   filter can be either:
   #   * a story id: selects the story represented by the id
   #   * a story type (feature, bug, chore): offers the user a selection of stories of the given type
+  #   * one or more criteria:value pairs separated by any of comma, space, and or pipe symbols
   #   * +nil+: offers the user a selection of stories of all types
   # @param [Fixnum] limit The number maximum number of stories the user can choose from
   # @return [PivotalTracker::Story] The Pivotal Tracker story selected by the user
@@ -66,6 +67,8 @@ class GitPivotalTrackerIntegration::Util::Story
   private
 
   CANDIDATE_STATES = %w(rejected unstarted unscheduled).freeze
+
+  CANDIDATE_TYPES = %w(bug feature chore release).freeze
 
   LABEL_DESCRIPTION = 'Description'.freeze
 
@@ -98,9 +101,16 @@ class GitPivotalTrackerIntegration::Util::Story
       :current_state => CANDIDATE_STATES,
       :limit => limit
     }
-    if type
+    if not CANDIDATE_TYPES.index(type).nil?
       criteria[:story_type] = type
-    end
+    elsif not type.nil?
+      type.split(/[&\|]/).each do |criterion|
+        kv = criterion.split(':')
+        if kv.length == 2
+          criteria[kv[0].to_sym] = kv[1]
+        end
+      end
+    end  
 
     candidates = project.stories.all criteria
     if candidates.length == 1
@@ -110,7 +120,7 @@ class GitPivotalTrackerIntegration::Util::Story
         menu.prompt = 'Choose story to start: '
 
         candidates.each do |story|
-          name = type ? story.name : '%-7s %s' % [story.story_type.upcase, story.name]
+          name = '%-7s %-20s %s' % [story.story_type.upcase, "(#{story.labels})", story.name]
           menu.choice(name) { story }
         end
       end
