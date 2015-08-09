@@ -44,4 +44,7 @@ class GitPivotalTrackerIntegration::Command::Base
     raise NotImplementedError
   end
 
+  def help
+  end  
+
 end

@@ -33,8 +33,14 @@ class GitPivotalTrackerIntegration::Command::Start < GitPivotalTrackerIntegratio
   #   * a story type (feature, bug, chore)
   #   * +nil+
   # @return [void]
-  def run(filter)
-    story = GitPivotalTrackerIntegration::Util::Story.select_story @project, filter
+  def run(filter = nil, limit = 10)
+    if filter == '-h' or filter == '--help'
+      help
+      return
+    end
+
+    puts 'Type `git start -h` for help'
+    story = GitPivotalTrackerIntegration::Util::Story.select_story @project, filter, limit
 
     GitPivotalTrackerIntegration::Util::Story.pretty_print story
 
@@ -63,5 +69,17 @@ class GitPivotalTrackerIntegration::Command::Start < GitPivotalTrackerIntegratio
     )
     puts 'OK'
   end
+
+  def help
+    puts 'USAGE: git start [id|type|filter[\'|\'filter ...]] [limit]'
+    puts
+    puts '       id:      the id of a pivotal tracker story'
+    puts '       type:    bug|feature|chore'
+    puts '       filter:  a string of the form key:value. See https://www.pivotaltracker.com/help/faq#howcanasearchberefined for examples'
+    puts
+    puts '                Some useful examples:     \'label:add-ons\', \'created_since:6/20/2015\', \'mywork:josephtk\', \'owner:josephtk\', \'requester:josephtk\', \'no:owner\''
+    puts
+    puts '       limit:   the maximum number of items to return (default 10)'
+  end  
 
 end
