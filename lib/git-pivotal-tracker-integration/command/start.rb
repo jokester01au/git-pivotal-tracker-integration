@@ -45,7 +45,9 @@ class GitPivotalTrackerIntegration::Command::Start < GitPivotalTrackerIntegratio
     GitPivotalTrackerIntegration::Util::Story.pretty_print story
 
     development_branch_name = development_branch_name story
-    GitPivotalTrackerIntegration::Util::Git.create_branch development_branch_name
+    if not development_branch_name.nil?
+        GitPivotalTrackerIntegration::Util::Git.create_branch development_branch_name
+    end    
     @configuration.story = story
 
     GitPivotalTrackerIntegration::Util::Git.add_hook 'prepare-commit-msg', File.join(File.dirname(__FILE__), 'prepare-commit-msg.sh')
@@ -56,7 +58,7 @@ class GitPivotalTrackerIntegration::Command::Start < GitPivotalTrackerIntegratio
   private
 
   def development_branch_name(story)
-    branch_name = "#{story.id}-" + ask("Enter branch name (#{story.id}-<branch-name>): ")
+    branch_name = "#{story.id}-" + ask("Enter branch name (#{story.id}-<branch-name> or enter to skip branch creation): ")
     puts
     branch_name
   end
